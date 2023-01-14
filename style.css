@@ -1,0 +1,32 @@
+/*Over Loading*/
+.container-fluid.over-loading {
+    min-height: 100vh;
+    min-width: 100vw;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background: #80808057;
+    z-index: 10;
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.container-fluid.over-loading .spinner-border {
+    height: 50px;
+    width: 50px;
+}
+
+
+/*Main Form*/
+.container-fluid.main-form .row {
+    min-height: 100vh;
+}
+
+.container-fluid.main-form .connect-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid rgba(135, 135, 135, 0.35)
+}

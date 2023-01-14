@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="./style.css">
+
+
+    <!--  Document: https://v2.vuejs.org/v2/guide/index.html  -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+
+    <!--  Axios  -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.1/dist/sweetalert2.all.min.js"></script>
+</head>
+<body>
+
+
+<main id="app">
+    <div class="container-fluid over-loading" v-bind:class="{ 'd-flex': loadingMode}">
+        <div class="spinner-border text-dark f"></div>
+    </div>
+
+
+    <div class="container-fluid main-form">
+        <div class="row">
+            <div class="col-4 connect-column">
+
+                <!--[       Connect Form         -->
+                <form id="connect-form">
+                    <div class="form-group">
+                        <label>Token:</label>
+                        <input type="text" class="form-control" placeholder="Token" v-model="token" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Connection Type:</label>
+                        <select class="form-control" v-model="connectType" required>
+                            <option value="member">Member</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+
+                    <button
+                            @click="submitConnectForm"
+                            type="button"
+                            class="btn btn-primary">
+                        Connect
+                    </button>
+                </form>
+                <!--       End Connect Form        ] -->
+
+            </div>
+        </div>
+    </div>
+    <div>
+    </div>
+</main>
+<script type="module">
+    // [--------------------------  ENV VARIABLES --------------------------------
+    const base_url= 'localhost::3000';
+    const locale= 'en'
+    // --------------------------  ENV VARIABLES --------------------------------]
+
+
+
+
+    // [--------------------------  SETUP AXIOS INSTANCE --------------------------------
+    const axiosService = axios.create();
+    axiosService.defaults.baseURL = base_url
+
+    // Add a request interceptor
+    axiosService.interceptors.request.use(function (config) {
+
+        // Config language
+        config.headers['Accept-Language'] = locale
+        return config;
+    });
+    // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
+
+
+
+
+
+    // [--------------------------  SETUP ALERT --------------------------------
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 8000,
+        timerProgressBar: true
+    })
+    // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
+
+
+
+
+    // [-------------------------- MAIN CHAT FUNCTION --------------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+        new Vue({
+            el: '#app',
+            data: {
+                loadingMode: false,
+
+                token: '',
+                connectType: 'member',
+                wasConnected: false,
+
+                authUser : {}
+            },
+            methods: {
+                async submitConnectForm() {
+                    if (!this.token && !this.connectType) {
+                        switch (this.connectType) {
+                            case "member":
+                                const member = await axiosService.post('/user', {
+                                firstName: 'Fred',
+                                lastName: 'Flintstone'
+                            })
+                                .then(function (response) {
+                                    console.log(response);
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                });
+                                break
+                        }
+                    }else  {
+
+                    }
+                },
+
+                showSuccessAlert (message) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: message || 'Successfully'
+                    })
+                },
+
+                showErrorAlert (error) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: error || 'Something went wrong !'
+                    })
+                }
+            }
+        })
+    });
+    // [-------------------------- MAIN CHAT FUNCTION --------------------------------]
+</script>
+</body>
+</html>
