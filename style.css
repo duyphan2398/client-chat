@@ -20,11 +20,11 @@
 
 
 /*Main Form*/
-.container-fluid.main-form .row {
+.main-container .row {
     min-height: 100vh;
 }
-
-.container-fluid.main-form .auth-column {
+/*Auth Column*/
+.main-container  .auth-column {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -33,14 +33,22 @@
     padding: 0;
 }
 
-.container-fluid.main-form .auth-column .connect-form,
-.container-fluid.main-form .auth-column .auth-info{
+.main-container  .auth-column .connect-form,
+.main-container  .auth-column .auth-info{
     width: 100%;
     background: beige;
     padding: 10px;
 }
 
-.container-fluid.main-form .auth-column .auth-info {
+.main-container .auth-column .auth-info {
     border-bottom: 1px solid black;
 }
-
+/*Chat Room Column*/
+.main-container .room-chat-column {
+    display: flex;
+    justify-content: flex-start;
+    align-items: start;
+    border-right: 1px solid rgba(135, 135, 135, 0.35);
+    flex-direction: column;
+    padding: 0;
+}

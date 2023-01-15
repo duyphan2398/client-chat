@@ -25,7 +25,7 @@
     </div>
 
 
-    <div class="container-fluid main-form">
+    <div class="container-fluid main-container">
         <div class="row">
             <div class="col-2 auth-column">
                 <div class="auth-info">
@@ -47,13 +47,13 @@
                                    required>
                         </div>
                         <div class="form-group">
-                            <label>Connection Type:</label>
+                            <label>Connect Page:</label>
                             <select class="form-control"
-                                    v-model="connectType"
+                                    v-model="routePrefix"
                                     :disabled="this.wasConnected"
                                     required>
-                                <option value="member">Member</option>
-                                <option value="expert">Expert</option>
+                                <option value="api">Member Pages</option>
+                                <option value="supplier-api">Supplier Dashboard</option>
                             </select>
                         </div>
 
@@ -70,7 +70,7 @@
 
 
             </div>
-            <div class="col-3 chat-room-column">
+            <div class="col-4 room-chat-column">
 
 
             </div>
@@ -172,22 +172,37 @@
             data: {
                 loadingMode: false,
 
+                // APIS
+                endpoints : {
+                    api: {
+                        profile: '/api/member/profile',
+
+
+                        room_chat_list: '/api/room-chats'
+
+                    },
+                    'supplier-api': {
+                        profile: '/supplier-api/supplier/profile',
+
+
+                        room_chat_list: '/supplier-api/room-chats'
+                    }
+                },
+
                 // Auth variables
                 token: '',
-                connectType: 'member',
+                routePrefix: 'api',
                 wasConnected: false,
                 authUser: {}
-
-
             },
 
             methods: {
                 async submitConnectForm() {
-                    if (this.token && this.connectType) {
+                    if (this.token) {
                         this.loadingMode = true
                         try {
+                            const connectEndPoint = this.endpoints[this.routePrefix]['profile']
 
-                            const connectEndPoint = '/' + this.connectType + 's/profile'
                             const response = await axiosService.get(connectEndPoint, { headers: {'Authorization': this.token} })
                             this.authUser = response.data.data
                             showSuccessAlert('Connect successfully')
