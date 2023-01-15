@@ -27,35 +27,51 @@
 
     <div class="container-fluid main-form">
         <div class="row">
-            <div class="col-3 connect-column">
-                <!--[       Connect Form         -->
-                <form id="connect-form">
-                    <div class="form-group">
-                        <label>Token:</label>
-                        <input type="text" class="form-control" placeholder="Token" v-model="token" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Connection Type:</label>
-                        <select class="form-control" v-model="connectType" required>
-                            <option value="member">Member</option>
-                            <option value="expert">Expert</option>
-                        </select>
-                    </div>
+            <div class="col-2 auth-column">
+                <div class="auth-info">
+                    <h1 class="text-center">Auth User</h1>
+                    <p>ID: {{ authUser.id}}</p>
+                    <p>Email: {{ authUser.email}}</p>
+                    <p>Phone: {{ authUser.phone_number}}</p>
+                </div>
+                <div class="connect-form">
+                    <!--[       Connect Form         -->
+                    <form id="connect-form">
+                        <div class="form-group">
+                            <label>Token:</label>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Token"
+                                   v-model="token"
+                                   :disabled="this.wasConnected"
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label>Connection Type:</label>
+                            <select class="form-control"
+                                    v-model="connectType"
+                                    :disabled="this.wasConnected"
+                                    required>
+                                <option value="member">Member</option>
+                                <option value="expert">Expert</option>
+                            </select>
+                        </div>
 
-                    <button
-                            @click="submitConnectForm"
-                            type="button"
-                            class="btn btn-primary">
-                        Connect
-                    </button>
-                </form>
-                <!--       End Connect Form        ] -->
+                        <button
+                                @click="submitConnectForm"
+                                type="button"
+                                :disabled="this.wasConnected"
+                                class="btn btn-primary">
+                            Connect
+                        </button>
+                    </form>
+                    <!--       End Connect Form        ] -->
+                </div>
+
 
             </div>
             <div class="col-3 chat-room-column">
-                <div class="row">
-                    {{ authUser }}
-                </div>
+
 
             </div>
         </div>
@@ -70,8 +86,35 @@
     // --------------------------  ENV VARIABLES --------------------------------]
 
 
+    // [--------------------------  SETUP ALERT --------------------------------
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 8000,
+        timerProgressBar: true
+    })
+
+    const showSuccessAlert = (message) => {
+        Toast.fire({
+            icon: 'success',
+            title: message || 'Successfully'
+        })
+    }
+
+    const showErrorAlert = (error) => {
+        Toast.fire({
+            icon: 'error',
+            title: error || 'Something went wrong !'
+        })
+    }
+
+    // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
+
+
     // [--------------------------  SETUP AXIOS INSTANCE --------------------------------
     const axiosService = axios.create();
+
     axiosService.defaults.baseURL = base_url
     axiosService.defaults.headers.common['Accept'] = 'application/json'
     axiosService.defaults.headers.common['Content-Type'] = 'application/json'
@@ -85,86 +128,82 @@
         config.headers['Accept-Language'] = locale
         return config;
     });
+
+    // Add a request interceptor
+    // Add a response interceptor
+    axiosService.interceptors.response.use(
+        (response) => {
+            const statusCode = response.data.code
+
+            if (statusCode === 401) {
+                showErrorAlert(response.data.message || 'Authentication Error')
+                return Promise.reject(response)
+            }
+
+            if (statusCode === 400) {
+                showErrorAlert(response.data.message || 'Bad Request')
+                return Promise.reject(response)
+            }
+
+            if ([403, 404, 429].includes(statusCode)) {
+                debugger
+                showErrorAlert(response.data.message || 'Something Went Wrong')
+                return Promise.reject(response)
+            }
+
+            return response
+        },
+
+        (error) => {
+            showErrorAlert(error || 'Server Error')
+            return Promise.reject(error)
+        });
     // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
 
 
-    // [--------------------------  SETUP ALERT --------------------------------
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 8000,
-        timerProgressBar: true
-    })
-    // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
+
+
 
 
     // [-------------------------- MAIN CHAT FUNCTION --------------------------------
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", () => {
         new Vue({
             el: '#app',
             data: {
                 loadingMode: false,
 
+                // Auth variables
                 token: '',
                 connectType: 'member',
                 wasConnected: false,
-
                 authUser: {}
+
+
             },
 
             methods: {
                 async submitConnectForm() {
                     if (this.token && this.connectType) {
+                        this.loadingMode = true
+                        try {
 
-                        switch (this.connectType) {
-                            case "member":
+                            const connectEndPoint = '/' + this.connectType + 's/profile'
+                            const response = await axiosService.get(connectEndPoint, { headers: {'Authorization': this.token} })
+                            this.authUser = response.data.data
+                            showSuccessAlert('Connect successfully')
+                            this.wasConnected = true;
 
-                                await axiosService.get('/members/profile',{
-                                    headers:{
-                                        'Authorization': this.token,
-                                    }
-                                })
-                                    .then((response) => {
-                                        this.authUser = response
-                                        this.showSuccessAlert('Connect successfully')
-                                    })
-                                    .catch((error) => {
-                                        this.showErrorAlert(error.message)
-                                    });
-                                break;
-                            case "expert":
-                                await axiosService.get('/experts/profile')
-                                    .then((response) => {
-                                        this.authUser = response
-                                        this.showSuccessAlert('Connect successfully')
-                                    })
-                                    .catch((error) => {
-                                        this.showErrorAlert(error.message)
-                                    });
-                                break;
-                            default:
-                                break
+                            // Get List Chat rooms
+
+                        } catch (e) {
+                            console.log(e)
                         }
+
+                        this.loadingMode = false
                     } else {
-                        this.showErrorAlert('Please fill full TOKEN and CONNECT TYPE')
+                        showErrorAlert('Please Fill Full Fields')
                     }
                 },
-
-
-                showSuccessAlert(message) {
-                    Toast.fire({
-                        icon: 'success',
-                        title: message || 'Successfully'
-                    })
-                },
-
-                showErrorAlert(error) {
-                    Toast.fire({
-                        icon: 'error',
-                        title: error || 'Something went wrong !'
-                    })
-                }
             }
         })
     });
