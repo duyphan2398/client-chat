@@ -27,8 +27,7 @@
 
     <div class="container-fluid main-form">
         <div class="row">
-            <div class="col-4 connect-column">
-
+            <div class="col-3 connect-column">
                 <!--[       Connect Form         -->
                 <form id="connect-form">
                     <div class="form-group">
@@ -53,6 +52,12 @@
                 <!--       End Connect Form        ] -->
 
             </div>
+            <div class="col-3 chat-room-column">
+                <div class="row">
+                    {{ authUser }}
+                </div>
+
+            </div>
         </div>
     </div>
     <div>
@@ -60,16 +65,18 @@
 </main>
 <script type="module">
     // [--------------------------  ENV VARIABLES --------------------------------
-    const base_url= 'localhost::3000';
-    const locale= 'en'
+    const base_url = 'http://localhost:3000';
+    const locale = 'en'
     // --------------------------  ENV VARIABLES --------------------------------]
-
-
 
 
     // [--------------------------  SETUP AXIOS INSTANCE --------------------------------
     const axiosService = axios.create();
     axiosService.defaults.baseURL = base_url
+    axiosService.defaults.headers.common['Accept'] = 'application/json'
+    axiosService.defaults.headers.common['Content-Type'] = 'application/json'
+    axiosService.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
+    axiosService.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
 
     // Add a request interceptor
     axiosService.interceptors.request.use(function (config) {
@@ -79,9 +86,6 @@
         return config;
     });
     // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
-
-
-
 
 
     // [--------------------------  SETUP ALERT --------------------------------
@@ -95,10 +99,8 @@
     // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
 
 
-
-
     // [-------------------------- MAIN CHAT FUNCTION --------------------------------
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         new Vue({
             el: '#app',
             data: {
@@ -108,38 +110,56 @@
                 connectType: 'member',
                 wasConnected: false,
 
-                authUser : {}
+                authUser: {}
             },
+
             methods: {
                 async submitConnectForm() {
-                    if (!this.token && !this.connectType) {
+                    if (this.token && this.connectType) {
+
                         switch (this.connectType) {
                             case "member":
-                                const member = await axiosService.post('/user', {
-                                firstName: 'Fred',
-                                lastName: 'Flintstone'
-                            })
-                                .then(function (response) {
-                                    console.log(response);
+
+                                await axiosService.get('/members/profile',{
+                                    headers:{
+                                        'Authorization': this.token,
+                                    }
                                 })
-                                .catch(function (error) {
-                                    console.log(error);
-                                });
+                                    .then((response) => {
+                                        this.authUser = response
+                                        this.showSuccessAlert('Connect successfully')
+                                    })
+                                    .catch((error) => {
+                                        this.showErrorAlert(error.message)
+                                    });
+                                break;
+                            case "expert":
+                                await axiosService.get('/experts/profile')
+                                    .then((response) => {
+                                        this.authUser = response
+                                        this.showSuccessAlert('Connect successfully')
+                                    })
+                                    .catch((error) => {
+                                        this.showErrorAlert(error.message)
+                                    });
+                                break;
+                            default:
                                 break
                         }
-                    }else  {
-
+                    } else {
+                        this.showErrorAlert('Please fill full TOKEN and CONNECT TYPE')
                     }
                 },
 
-                showSuccessAlert (message) {
+
+                showSuccessAlert(message) {
                     Toast.fire({
                         icon: 'success',
                         title: message || 'Successfully'
                     })
                 },
 
-                showErrorAlert (error) {
+                showErrorAlert(error) {
                     Toast.fire({
                         icon: 'error',
                         title: error || 'Something went wrong !'
