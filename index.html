@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat Demo</title>
+    <title>Ape Chat Demo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
     <link rel="stylesheet" href="./style.css">
@@ -15,6 +15,12 @@
 
     <!-- Sweetalert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.1/dist/sweetalert2.all.min.js"></script>
+
+    <!--  SocketIO  -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
+            integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI"
+            crossorigin="anonymous"></script>
+
 </head>
 <body>
 
@@ -27,6 +33,8 @@
 
     <div class="container-fluid main-container">
         <div class="row">
+
+            <!--      FIRST COLUMN      -->
             <div class="col-2 auth-column">
                 <div class="auth-info">
                     <h1 class="text-center">Auth User</h1>
@@ -67,12 +75,26 @@
                     </form>
                     <!--       End Connect Form        ] -->
                 </div>
-
-
             </div>
+
+
+            <!--      SECOND COLUMN      -->
             <div class="col-4 room-chat-column">
-
-
+                <template v-for="room in rooms">
+                    <div class="room-item">
+                        <div class="room-item-image">
+                            <img v-bind:src="room.expert.expert_avatar" alt="Roommate avtar">
+                        </div>
+                        <div class="room-item-info">
+                            <h5>
+                                Expert Name: {{ room.expert.name }}
+                            </h5>
+                            <p>
+                                Expert ID: {{ room.expert.id }}
+                            </p>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -81,9 +103,27 @@
 </main>
 <script type="module">
     // [--------------------------  ENV VARIABLES --------------------------------
-    const base_url = 'http://localhost:3000';
-    const locale = 'en'
+    const server_url = 'http://localhost:3000';
+    const locale = 'zho';
     // --------------------------  ENV VARIABLES --------------------------------]
+
+
+
+
+
+
+
+
+    // [--------------------------  SOCKET INIT --------------------------------
+
+    // --------------------------  SOCKET INIT --------------------------------]
+
+
+
+
+
+
+
 
 
     // [--------------------------  SETUP ALERT --------------------------------
@@ -109,13 +149,21 @@
         })
     }
 
-    // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
+    // --------------------------  SETUP ALERT --------------------------------]
+
+
+
+
+
+
+
 
 
     // [--------------------------  SETUP AXIOS INSTANCE --------------------------------
     const axiosService = axios.create();
 
-    axiosService.defaults.baseURL = base_url
+    axiosService.defaults.baseURL = server_url
+    axiosService.defaults.timeout = 5000;
     axiosService.defaults.headers.common['Accept'] = 'application/json'
     axiosService.defaults.headers.common['Content-Type'] = 'application/json'
     axiosService.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
@@ -146,7 +194,6 @@
             }
 
             if ([403, 404, 429].includes(statusCode)) {
-                debugger
                 showErrorAlert(response.data.message || 'Something Went Wrong')
                 return Promise.reject(response)
             }
@@ -165,6 +212,9 @@
 
 
 
+
+
+
     // [-------------------------- MAIN CHAT FUNCTION --------------------------------
     document.addEventListener("DOMContentLoaded", () => {
         new Vue({
@@ -173,16 +223,17 @@
                 loadingMode: false,
 
                 // APIS
-                endpoints : {
+                endpoints: {
                     api: {
-                        profile: '/api/member/profile',
+                        profile: '/api/members/profile',
 
 
                         room_chat_list: '/api/room-chats'
 
                     },
+
                     'supplier-api': {
-                        profile: '/supplier-api/supplier/profile',
+                        profile: '/supplier-api/suppliers/profile',
 
 
                         room_chat_list: '/supplier-api/room-chats'
@@ -193,7 +244,13 @@
                 token: '',
                 routePrefix: 'api',
                 wasConnected: false,
-                authUser: {}
+                authUser: {},
+
+                // Socket variables
+                socket: {},
+
+                // Chat variable
+                rooms: []
             },
 
             methods: {
@@ -203,13 +260,14 @@
                         try {
                             const connectEndPoint = this.endpoints[this.routePrefix]['profile']
 
-                            const response = await axiosService.get(connectEndPoint, { headers: {'Authorization': this.token} })
+                            const response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
                             this.authUser = response.data.data
                             showSuccessAlert('Connect successfully')
+
+                            // Init Socket
+                            this.initSocket()
+
                             this.wasConnected = true;
-
-                            // Get List Chat rooms
-
                         } catch (e) {
                             console.log(e)
                         }
@@ -219,6 +277,24 @@
                         showErrorAlert('Please Fill Full Fields')
                     }
                 },
+
+                initSocket() {
+                   this.socket = io(server_url+'/api-chat', {
+                       auth: {...this.authUser},
+                       extraHeaders: {
+                           Authorization: this.token
+                       }
+                   });
+
+                    this.socket.on("throw-exception", (e) => {
+                        showErrorAlert(e)
+                    });
+
+                    this.socket.on("load-rooms", (rooms) => {
+                        this.rooms = rooms
+                    });
+
+                }
             }
         })
     });
