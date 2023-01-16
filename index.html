@@ -35,21 +35,22 @@
         <div class="row">
 
             <!--      FIRST COLUMN      -->
-            <div class="col-2 auth-column">
+            <div class="col-2 first-column">
                 <div class="auth-info">
-                    <h1 class="text-center">Auth User</h1>
+                    <h3 class="text-center">Member Info</h3>
                     <p>ID: {{ authUser.id}}</p>
                     <p>Email: {{ authUser.email}}</p>
                     <p>Phone: {{ authUser.phone_number}}</p>
                 </div>
                 <div class="connect-form">
+                    <h3 class="text-center">Connect Form</h3>
                     <!--[       Connect Form         -->
                     <form id="connect-form">
                         <div class="form-group">
                             <label>Token:</label>
                             <input type="text"
                                    class="form-control"
-                                   placeholder="Token"
+                                   placeholder=""
                                    v-model="token"
                                    :disabled="this.wasConnected"
                                    required>
@@ -61,7 +62,7 @@
                                     :disabled="this.wasConnected"
                                     required>
                                 <option value="api">Member Pages</option>
-                                <option value="supplier-api">Supplier Dashboard</option>
+<!--                                <option value="supplier-api">Supplier Dashboard</option>-->
                             </select>
                         </div>
 
@@ -74,6 +75,30 @@
                         </button>
                     </form>
                     <!--       End Connect Form        ] -->
+                </div>
+                <div class="create-room-form">
+                    <h3 class="text-center">Create Room Form</h3>
+                    <!--[       Create Room Form         -->
+                    <form id="create-room-form">
+                        <div class="form-group">
+                            <label>Expert ID:</label>
+                            <input type="number"
+                                   class="form-control"
+                                   placeholder=""
+                                   v-model="createRoomForm.expert_id"
+                                   :disabled="!this.wasConnected"
+                                   required>
+                        </div>
+
+                        <button
+                                @click="submitCreateRoomForm"
+                                type="button"
+                                :disabled="!this.wasConnected"
+                                class="btn btn-primary">
+                            Create
+                        </button>
+                    </form>
+                    <!--       End Create Room Form      ] -->
                 </div>
             </div>
 
@@ -250,7 +275,10 @@
                 socket: {},
 
                 // Chat variable
-                rooms: []
+                rooms: [],
+                createRoomForm: {
+                    expert_id: null
+                }
             },
 
             methods: {
@@ -276,6 +304,10 @@
                     } else {
                         showErrorAlert('Please Fill Full Fields')
                     }
+                },
+
+                submitCreateRoomForm() {
+                    console.log()
                 },
 
                 initSocket() {
