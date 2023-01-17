@@ -37,10 +37,13 @@
             <!--      FIRST COLUMN      -->
             <div class="col-2 first-column">
                 <div class="auth-info">
-                    <h3 class="text-center">Member Info</h3>
+                    <h3 class="text-center">User Info</h3>
                     <p>ID: {{ authUser.id}}</p>
                     <p>Email: {{ authUser.email}}</p>
                     <p>Phone: {{ authUser.phone_number}}</p>
+                    <p>
+                        Page: {{ routePrefix === 'api' ? 'Member Page' : 'Supplier Dashboard'}}
+                    </p>
                 </div>
                 <div class="connect-form">
                     <h3 class="text-center">Connect Form</h3>
@@ -62,7 +65,7 @@
                                     :disabled="this.wasConnected"
                                     required>
                                 <option value="api">Member Pages</option>
-<!--                                <option value="supplier-api">Supplier Dashboard</option>-->
+                                <option value="supplier-api">Supplier Dashboard</option>
                             </select>
                         </div>
 
@@ -81,11 +84,11 @@
                     <!--[       Create Room Form         -->
                     <form id="create-room-form">
                         <div class="form-group">
-                            <label>Expert ID:</label>
+                            <label>Partner ID:</label>
                             <input type="number"
                                    class="form-control"
                                    placeholder=""
-                                   v-model="createRoomForm.expert_id"
+                                   v-model="createRoomForm.partner_id"
                                    :disabled="!this.wasConnected"
                                    required>
                         </div>
@@ -133,22 +136,9 @@
     // --------------------------  ENV VARIABLES --------------------------------]
 
 
-
-
-
-
-
-
     // [--------------------------  SOCKET INIT --------------------------------
 
     // --------------------------  SOCKET INIT --------------------------------]
-
-
-
-
-
-
-
 
 
     // [--------------------------  SETUP ALERT --------------------------------
@@ -175,13 +165,6 @@
     }
 
     // --------------------------  SETUP ALERT --------------------------------]
-
-
-
-
-
-
-
 
 
     // [--------------------------  SETUP AXIOS INSTANCE --------------------------------
@@ -233,13 +216,6 @@
     // --------------------------  SETUP AXIOS INSTANCE --------------------------------]
 
 
-
-
-
-
-
-
-
     // [-------------------------- MAIN CHAT FUNCTION --------------------------------
     document.addEventListener("DOMContentLoaded", () => {
         new Vue({
@@ -277,7 +253,7 @@
                 // Chat variable
                 rooms: [],
                 createRoomForm: {
-                    expert_id: null
+                    partner_id: null
                 }
             },
 
@@ -286,9 +262,9 @@
                     if (this.token) {
                         this.loadingMode = true
                         try {
-                            const connectEndPoint = this.endpoints[this.routePrefix]['profile']
+                            let connectEndPoint = this.endpoints[this.routePrefix]['profile']
 
-                            const response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
+                            let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
                             this.authUser = response.data.data
                             showSuccessAlert('Connect successfully')
 
@@ -296,9 +272,7 @@
                             this.initSocket()
 
                             this.wasConnected = true;
-                        } catch (e) {
-                            console.log(e)
-                        }
+                        } catch (e) { console.log(e) }
 
                         this.loadingMode = false
                     } else {
@@ -310,16 +284,43 @@
                     console.log()
                 },
 
-                initSocket() {
-                   this.socket = io(server_url+'/api-chat', {
-                       auth: {...this.authUser},
-                       extraHeaders: {
-                           Authorization: this.token
-                       }
-                   });
 
-                    this.socket.on("throw-exception", (e) => {
-                        showErrorAlert(e)
+                initSocket() {
+                    this.socket = io(server_url + '/chat', {
+                        auth: {...this.authUser},
+                        extraHeaders: {
+                            Authorization: this.token
+                        },
+                        query: {
+                            'route_prefix': this.routePrefix
+                        }
+                    });
+
+
+                    this.socket.on("success-notice", (response) => {
+                        //response => {
+                        // nameOfEvent
+                        // code
+                        // message
+                        // }
+                        showSuccessAlert(response.message)
+                    });
+
+
+                    this.socket.on("error-notice", (error) => {
+                        //error => {
+                        // nameOfEvent
+                        // code
+                        // message
+                        // }
+                        showErrorAlert(error.message)
+
+
+                        // Reset auth variables if unauthenticated
+                        if (error.code === 401) {
+                            this.wasConnected = false
+                            this.authUser = {}
+                        }
                     });
 
                     this.socket.on("load-rooms", (rooms) => {
