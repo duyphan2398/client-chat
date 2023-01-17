@@ -226,18 +226,13 @@
                 // APIS
                 endpoints: {
                     api: {
-                        profile: '/api/members/profile',
-
-
-                        room_chat_list: '/api/room-chats'
-
+                        profile: {url: '/api/members/profile', method: 'get'},
+                        create_room_chat: {url: '/api/room-chats', method: 'post'}
                     },
 
                     'supplier-api': {
-                        profile: '/supplier-api/suppliers/profile',
-
-
-                        room_chat_list: '/supplier-api/room-chats'
+                        profile: {url: '/supplier-api/suppliers/profile', method: 'get'},
+                        create_room_chat: {url: '/supplier-api/room-chats', method: 'post'}
                     }
                 },
 
@@ -259,29 +254,62 @@
 
             methods: {
                 async submitConnectForm() {
-                    if (this.token) {
-                        this.loadingMode = true
-                        try {
-                            let connectEndPoint = this.endpoints[this.routePrefix]['profile']
-
-                            let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
-                            this.authUser = response.data.data
-                            showSuccessAlert('Connect successfully')
-
-                            // Init Socket
-                            this.initSocket()
-
-                            this.wasConnected = true;
-                        } catch (e) { console.log(e) }
-
-                        this.loadingMode = false
-                    } else {
-                        showErrorAlert('Please Fill Full Fields')
+                    if (!this.token) {
+                        return showErrorAlert('Please Fill Full Fields')
                     }
+
+                    this.loadingMode = true
+                    try {
+                        let connectEndPoint = this.endpoints[this.routePrefix]['profile']['url']
+
+                        let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
+                        this.authUser = response.data.data
+                        showSuccessAlert('Connect successfully')
+
+                        // Init Socket
+                        this.initSocket()
+
+                        this.wasConnected = true;
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+                    this.loadingMode = false
                 },
 
-                submitCreateRoomForm() {
-                    console.log()
+                async submitCreateRoomForm() {
+
+                    if (!this.createRoomForm.partner_id) {
+                        return showErrorAlert('Please Fill Full Fields')
+                    }
+
+                    this.loadingMode = true
+
+                    try {
+                        let createRoomEndPoint = this.endpoints[this.routePrefix]['create_room_chat']['url']
+                        let submitData = {}
+                        if (this.routePrefix === 'api') {
+                            submitData.expert_id = parseInt(this.createRoomForm.partner_id)
+                        }else  {
+                            submitData.member_id = parseInt(this.createRoomForm.partner_id)
+                        }
+
+                        let room = await axiosService.post(
+                            createRoomEndPoint,
+                            submitData,
+                            {headers: {'Authorization': this.token}})
+                        console.log(room.data.data)
+
+                        // showSuccessAlert('Create successfully')
+                        //
+                        // // Init Socket
+                        // this.socket.emit('created-room', room)
+
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+                    this.loadingMode = false
                 },
 
 
@@ -297,27 +325,16 @@
                     });
 
 
-                    this.socket.on("success-notice", (response) => {
-                        //response => {
-                        // nameOfEvent
-                        // code
-                        // message
-                        // }
-                        showSuccessAlert(response.message)
+                    this.socket.on("success-notice", ({nameOfEvent, code, message}) => {
+                        showSuccessAlert(message)
                     });
 
 
-                    this.socket.on("error-notice", (error) => {
-                        //error => {
-                        // nameOfEvent
-                        // code
-                        // message
-                        // }
-                        showErrorAlert(error.message)
-
+                    this.socket.on("error-notice", ({nameOfEvent, code, message}) => {
+                        showErrorAlert(message)
 
                         // Reset auth variables if unauthenticated
-                        if (error.code === 401) {
+                        if (code === 401) {
                             this.wasConnected = false
                             this.authUser = {}
                         }
