@@ -108,21 +108,42 @@
 
             <!--      SECOND COLUMN      -->
             <div class="col-4 room-chat-column">
-                <template v-for="room in rooms">
-                    <div class="room-item">
-                        <div class="room-item-image">
-                            <img v-bind:src="room.expert.expert_avatar" alt="Roommate avtar">
+                <template  v-if=" routePrefix === 'supplier-api' ">
+                    <template v-for="room in rooms">
+                        <div class="room-item">
+                            <div class="room-item-image">
+                                <img v-bind:src="room.member.member_avatar" alt="Roommate avtar">
+                            </div>
+                            <div class="room-item-info">
+                                <p>
+                                    <b>Member Phone: {{ room.member.phone_number }}</b>
+                                </p>
+                                <p>
+                                    Member ID: {{ room.member.id }}
+                                </p>
+                            </div>
                         </div>
-                        <div class="room-item-info">
-                            <h5>
-                                Expert Name: {{ room.expert.name }}
-                            </h5>
-                            <p>
-                                Expert ID: {{ room.expert.id }}
-                            </p>
-                        </div>
-                    </div>
+                    </template>
                 </template>
+
+                <template  v-else >
+                    <template v-for="room in rooms">
+                        <div class="room-item">
+                            <div class="room-item-image">
+                                <img v-bind:src="room.expert.expert_avatar" alt="Roommate avtar">
+                            </div>
+                            <div class="room-item-info">
+                                <p>
+                                    <b>Expert Name: {{ room.expert.name }}</b>
+                                </p>
+                                <p>
+                                    Expert ID: {{ room.expert.id }}
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
             </div>
         </div>
     </div>
@@ -294,16 +315,15 @@
                             submitData.member_id = parseInt(this.createRoomForm.partner_id)
                         }
 
-                        let room = await axiosService.post(
+                        let response = await axiosService.post(
                             createRoomEndPoint,
                             submitData,
                             {headers: {'Authorization': this.token}})
-                        console.log(room.data.data)
 
-                        // showSuccessAlert('Create successfully')
-                        //
-                        // // Init Socket
-                        // this.socket.emit('created-room', room)
+                        showSuccessAlert('Create successfully')
+
+                            // Emit created room
+                         this.socket.emit('created-room', response.data.data)
 
                     } catch (e) {
                         console.log(e)
