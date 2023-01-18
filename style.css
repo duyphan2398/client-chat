@@ -44,6 +44,16 @@
     border-bottom: 3px solid rgba(135, 135, 135, 0.35);
 }
 
+.main-container  .first-column .logout-button{
+    width: 100%;
+    background: #2c2c1542;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 3px solid rgba(135, 135, 135, 0.35);
+}
+
+
+
 /*Chat Room Column*/
 .main-container .room-chat-column {
     display: flex;
