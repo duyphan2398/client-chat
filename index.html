@@ -36,12 +36,30 @@
             <!--      FIRST COLUMN      -->
             <div class="col-2 first-column">
                 <div class="auth-info">
-                    <h3 class="text-center">User Info</h3>
-                    <p>ID: {{ authUser.id}}</p>
-                    <p>Email: {{ authUser.email}}</p>
-                    <p>Phone: {{ authUser.phone_number}}</p>
+                    <template v-if=" routePrefix === 'supplier-api' ">
+                        <h3 class="text-center">Expert Info</h3>
+                        <p>
+                            <b>Expert ID:</b> {{ authUser.id}}
+                        </p>
+                        <p>
+                            <b>Expert Name:</b> {{ authUser.name}}
+                        </p>
+                    </template>
+
+                    <template v-else>
+                        <h3 class="text-center">Member Info</h3>
+                        <p>
+                            <b>Member ID:</b> {{ authUser.id}}
+                        </p>
+                        <p>
+                            <b>Member Email:</b> {{ authUser.email}}
+                        </p>
+                        <p>
+                            <b>Member Phone:</b> {{ authUser.phone_number}}
+                        </p>
+                    </template>
                     <p>
-                        Page: {{ routePrefix === 'api' ? 'Member Page' : 'Supplier Dashboard'}}
+                        <b>Page:</b> {{ routePrefix === 'api' ? 'Member Page' : 'Supplier Dashboard'}}
                     </p>
                 </div>
                 <div class="connect-form">
@@ -107,7 +125,7 @@
 
             <!--      SECOND COLUMN      -->
             <div class="col-4 room-chat-column">
-                <template  v-if=" routePrefix === 'supplier-api' ">
+                <template v-if=" routePrefix === 'supplier-api' ">
                     <template v-for="room in rooms">
                         <div class="room-item">
                             <div class="room-item-image">
@@ -125,7 +143,7 @@
                     </template>
                 </template>
 
-                <template  v-else >
+                <template v-else>
                     <template v-for="room in rooms">
                         <div class="room-item">
                             <div class="room-item-image">
@@ -142,7 +160,6 @@
                         </div>
                     </template>
                 </template>
-
             </div>
         </div>
     </div>
@@ -277,13 +294,13 @@
                 }
             },
 
-            created: function () {
-                const  token = localStorage.getItem('ape-chat-token')
-                if (token) {
-                    console.log(token)
-                    this.token  = token
-                    this.wasConnected = true;
-                    this.initSocket()
+            created: async function () {
+                const token = localStorage.getItem('ape-chat-token')
+                const routePrefix = localStorage.getItem('ape-chat-route-prefix')
+                if (token && routePrefix) {
+                    this.token = token
+                    this.routePrefix = routePrefix
+                    await this.submitConnectForm()
                 }
             },
 
@@ -306,7 +323,9 @@
                         this.initSocket()
 
                         this.wasConnected = true;
+
                         localStorage.setItem('ape-chat-token', this.token)
+                        localStorage.setItem('ape-chat-route-prefix', this.routePrefix)
                     } catch (e) {
                         console.log(e)
                     }
@@ -327,7 +346,7 @@
                         let submitData = {}
                         if (this.routePrefix === 'api') {
                             submitData.expert_id = parseInt(this.createRoomForm.partner_id)
-                        }else  {
+                        } else {
                             submitData.member_id = parseInt(this.createRoomForm.partner_id)
                         }
 
@@ -338,10 +357,10 @@
 
                         showSuccessAlert('Create successfully')
 
-                            // Emit created room
-                         this.socket.emit('created-room', response.data.data)
+                        // Emit created room
+                        this.socket.emit('created-room', response.data.data)
 
-                    }catch (e) {
+                    } catch (e) {
                         console.log(e)
                     }
 
