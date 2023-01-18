@@ -66,13 +66,19 @@
     cursor: pointer;
     padding: 10px;
     border-bottom: 3px solid rgba(135, 135, 135, 0.35);
+    transition: 0.3s;
+}
+
+.main-container .room-chat-column .room-item:hover  {
+    background: rgba(191, 210, 230, 0.5);
 }
 
 .main-container .room-chat-column .room-item .room-item-image img {
     height: 60px;
-    width: 60px;
+    max-width: 60px;
     object-fit: contain;
     border-radius: 50%;
+    background-color: rgba(250, 206, 168, 0.6);
 }
 
 .main-container .room-chat-column .room-item .room-item-info {

@@ -20,7 +20,6 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
             integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI"
             crossorigin="anonymous"></script>
-
 </head>
 <body>
 
@@ -222,6 +221,11 @@
                 return Promise.reject(response)
             }
 
+            if (statusCode === 422) {
+                showErrorAlert(response.data.error || 'Bad Request')
+                return Promise.reject(response)
+            }
+
             if ([403, 404, 429].includes(statusCode)) {
                 showErrorAlert(response.data.message || 'Something Went Wrong')
                 return Promise.reject(response)
@@ -246,7 +250,7 @@
 
                 // APIS
                 endpoints: {
-                    api: {
+                    'api': {
                         profile: {url: '/api/members/profile', method: 'get'},
                         create_room_chat: {url: '/api/room-chats', method: 'post'}
                     },
@@ -273,6 +277,17 @@
                 }
             },
 
+            created: function () {
+                const  token = localStorage.getItem('ape-chat-token')
+                if (token) {
+                    console.log(token)
+                    this.token  = token
+                    this.wasConnected = true;
+                    this.initSocket()
+                }
+            },
+
+
             methods: {
                 async submitConnectForm() {
                     if (!this.token) {
@@ -291,6 +306,7 @@
                         this.initSocket()
 
                         this.wasConnected = true;
+                        localStorage.setItem('ape-chat-token', this.token)
                     } catch (e) {
                         console.log(e)
                     }
@@ -325,7 +341,7 @@
                             // Emit created room
                          this.socket.emit('created-room', response.data.data)
 
-                    } catch (e) {
+                    }catch (e) {
                         console.log(e)
                     }
 
