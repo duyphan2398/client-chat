@@ -121,7 +121,10 @@
                     <!--       End Create Room Form      ] -->
                 </div>
                 <div class="logout-button">
-                    <button class="btn ">Logout</button>
+                    <button
+                            type="button"
+                            @click="logout"
+                            class="btn btn-success">Logout</button>
                 </div>
             </div>
 
@@ -170,15 +173,16 @@
     </div>
 </main>
 <script type="module">
+    import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
+
     // [--------------------------  ENV VARIABLES --------------------------------
     const server_url = 'http://localhost:3000';
     const locale = 'zho';
     // --------------------------  ENV VARIABLES --------------------------------]
 
 
-    // [--------------------------  SOCKET INIT --------------------------------
-
-    // --------------------------  SOCKET INIT --------------------------------]
+    // [--------------------------  LOCAL STORAGE INIT --------------------------------
+    // --------------------------  LOCAL STORAGE INIT --------------------------------]
 
 
     // [--------------------------  SETUP ALERT --------------------------------
@@ -222,6 +226,12 @@
 
         // Config language
         config.headers['Accept-Language'] = locale
+
+        if (localStorage.getItem('ape-chat-token')) {
+            config.headers['Authorization'] = localStorage.getItem('ape-chat-token')
+        }
+
+
         return config;
     });
 
@@ -282,8 +292,10 @@
                 },
 
                 // Auth variables
+                sessionId: '',
                 token: '',
                 routePrefix: 'api',
+
                 wasConnected: false,
                 authUser: {},
 
@@ -298,17 +310,43 @@
             },
 
             created: async function () {
-                const token = localStorage.getItem('ape-chat-token')
-                const routePrefix = localStorage.getItem('ape-chat-route-prefix')
-                if (token && routePrefix) {
-                    this.token = token
-                    this.routePrefix = routePrefix
-                    await this.submitConnectForm()
+                this.sessionId = localStorage.getItem('ape-chat-session-id')
+                this.token = localStorage.getItem('ape-chat-token')
+                this.routePrefix = localStorage.getItem('ape-chat-route-prefix')
+
+                if (this.token &&
+                    this.routePrefix &&
+                    this.sessionId
+                ) {
+                    this.loadingMode = true
+                    try {
+                        let connectEndPoint = this.endpoints[this.routePrefix]['profile']['url']
+
+                        let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
+                        this.authUser = response.data.data
+                        showSuccessAlert('Connect successfully')
+
+                        // Init Socket
+                        this.initSocket()
+
+                        this.wasConnected = true;
+                    } catch (e) {}
+
+                    this.loadingMode = false
+
+                } else  {
+                    this.sessionId = uuidv4();
+                    localStorage.setItem('ape-chat-session-id', this.sessionId)
                 }
             },
 
 
             methods: {
+                 logout() {
+                    // Emit close-session
+                    this.socket.emit('logout')
+                },
+
                 async submitConnectForm() {
                     if (!this.token) {
                         return showErrorAlert('Please Fill Full Fields')
@@ -325,10 +363,11 @@
                         // Init Socket
                         this.initSocket()
 
-                        this.wasConnected = true;
-
+                        // Set local storage
                         localStorage.setItem('ape-chat-token', this.token)
                         localStorage.setItem('ape-chat-route-prefix', this.routePrefix)
+
+                        this.wasConnected = true;
                     } catch (e) {
                         console.log(e)
                     }
@@ -355,8 +394,7 @@
 
                         let response = await axiosService.post(
                             createRoomEndPoint,
-                            submitData,
-                            {headers: {'Authorization': this.token}})
+                            submitData)
 
                         showSuccessAlert('Create successfully')
 
@@ -378,7 +416,8 @@
                             Authorization: this.token
                         },
                         query: {
-                            'route_prefix': this.routePrefix
+                            'route_prefix': this.routePrefix,
+                            'session_id': this.sessionId
                         }
                     });
 
@@ -401,6 +440,28 @@
                     this.socket.on("load-rooms", (rooms) => {
                         this.rooms = rooms
                     });
+
+                    this.socket.on("login-and-set-data", (data) => {
+                        localStorage.removeItem('ape-chat-token');
+                        localStorage.removeItem('ape-chat-route-prefix');
+                        this.token = '';
+                        this.routePrefix = 'api';
+                        this.authUser = {};
+                        this.wasConnected = false
+                        this.rooms = []
+                        this.socket.disconnect()
+                    })
+
+                    this.socket.on("logout-and-clear-data", () => {
+                        localStorage.removeItem('ape-chat-token');
+                        localStorage.removeItem('ape-chat-route-prefix');
+                        this.token = '';
+                        this.routePrefix = 'api';
+                        this.authUser = {};
+                        this.wasConnected = false
+                        this.rooms = []
+                        this.socket.disconnect()
+                    })
 
                 }
             }
