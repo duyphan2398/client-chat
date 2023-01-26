@@ -124,7 +124,8 @@
                     <button
                             type="button"
                             @click="logout"
-                            class="btn btn-success">Logout</button>
+                            class="btn btn-success">Logout
+                    </button>
                 </div>
             </div>
 
@@ -133,7 +134,7 @@
             <div class="col-4 room-chat-column">
                 <template v-if=" routePrefix === 'supplier-api' ">
                     <template v-for="room in rooms">
-                        <div class="room-item">
+                        <div class="room-item" @click="chooseRoom(room.id)">
                             <div class="room-item-image">
                                 <img v-bind:src="room.member.member_avatar" alt="Roommate avtar">
                             </div>
@@ -151,7 +152,7 @@
 
                 <template v-else>
                     <template v-for="room in rooms">
-                        <div class="room-item">
+                        <div class="room-item"   @click="chooseRoom(room.id)" >
                             <div class="room-item-image">
                                 <img v-bind:src="room.expert.expert_avatar" alt="Roommate avtar">
                             </div>
@@ -173,7 +174,7 @@
     </div>
 </main>
 <script type="module">
-    import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
+    import {v4 as uuidv4} from 'https://jspm.dev/uuid';
 
     // [--------------------------  ENV VARIABLES --------------------------------
     const server_url = 'http://localhost:3000';
@@ -282,12 +283,14 @@
                 endpoints: {
                     'api': {
                         profile: {url: '/api/members/profile', method: 'get'},
-                        create_room_chat: {url: '/api/room-chats', method: 'post'}
+                        create_room_chat: {url: '/api/room-chats', method: 'post'},
+                        get_chat_detail_list: {url: '/api/chat-details', method: 'get'}
                     },
 
                     'supplier-api': {
                         profile: {url: '/supplier-api/suppliers/profile', method: 'get'},
-                        create_room_chat: {url: '/supplier-api/room-chats', method: 'post'}
+                        create_room_chat: {url: '/supplier-api/room-chats', method: 'post'},
+                        get_chat_detail_list: {url: '/supplier-api/chat-details', method: 'get'}
                     }
                 },
 
@@ -334,7 +337,7 @@
 
                     this.loadingMode = false
 
-                } else  {
+                } else {
                     this.sessionId = uuidv4();
                     localStorage.setItem('ape-chat-session-id', this.sessionId)
                 }
@@ -342,8 +345,19 @@
 
 
             methods: {
-                 logout() {
-                    // Emit close-session
+                logout() {
+                    localStorage.removeItem('ape-chat-token');
+                    localStorage.removeItem('ape-chat-route-prefix');
+                    this.token = '';
+                    this.routePrefix = 'api';
+                    this.authUser = {};
+                    this.createRoomForm = {
+                        partner_id: null
+                    }
+                    this.wasConnected = false
+                    this.rooms = []
+
+                    // Emit logout to other client in session
                     this.socket.emit('logout')
                 },
 
@@ -408,6 +422,30 @@
                     this.loadingMode = false
                 },
 
+                async chooseRoom(roomId) {
+                    console.log(roomId)
+                    this.loadingMode = true
+
+                    try {
+                        let getChatDetailsEndPoint = this.endpoints[this.routePrefix]['get_chat_detail_list']['url']
+
+                        let response = await axiosService.get(
+                            getChatDetailsEndPoint,
+                            {
+                                params: {
+                                    room_id: roomId
+                                }
+                            }
+                        )
+
+                        console.log(response.data)
+
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+                    this.loadingMode = false
+                },
 
                 initSocket() {
                     this.socket = io(server_url + '/chat', {
@@ -420,7 +458,6 @@
                             'session_id': this.sessionId
                         }
                     });
-
 
                     this.socket.on("success-notice", ({nameOfEvent, code, message}) => {
                         showSuccessAlert(message)
@@ -441,23 +478,15 @@
                         this.rooms = rooms
                     });
 
-                    this.socket.on("login-and-set-data", (data) => {
+                    this.socket.on("logout", () => {
                         localStorage.removeItem('ape-chat-token');
                         localStorage.removeItem('ape-chat-route-prefix');
                         this.token = '';
                         this.routePrefix = 'api';
                         this.authUser = {};
-                        this.wasConnected = false
-                        this.rooms = []
-                        this.socket.disconnect()
-                    })
-
-                    this.socket.on("logout-and-clear-data", () => {
-                        localStorage.removeItem('ape-chat-token');
-                        localStorage.removeItem('ape-chat-route-prefix');
-                        this.token = '';
-                        this.routePrefix = 'api';
-                        this.authUser = {};
+                        this.createRoomForm = {
+                            partner_id: null
+                        }
                         this.wasConnected = false
                         this.rooms = []
                         this.socket.disconnect()
