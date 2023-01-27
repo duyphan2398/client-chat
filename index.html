@@ -284,13 +284,13 @@
                     'api': {
                         profile: {url: '/api/members/profile', method: 'get'},
                         create_room_chat: {url: '/api/room-chats', method: 'post'},
-                        get_chat_detail_list: {url: '/api/chat-details', method: 'get'}
+                        get_chat_detail_list: {url: '/api/room-chat-details', method: 'get'}
                     },
 
                     'supplier-api': {
                         profile: {url: '/supplier-api/suppliers/profile', method: 'get'},
                         create_room_chat: {url: '/supplier-api/room-chats', method: 'post'},
-                        get_chat_detail_list: {url: '/supplier-api/chat-details', method: 'get'}
+                        get_chat_detail_list: {url: '/supplier-api/room-chat-details', method: 'get'}
                     }
                 },
 
@@ -306,10 +306,13 @@
                 socket: {},
 
                 // Chat variable
-                rooms: [],
                 createRoomForm: {
                     partner_id: null
-                }
+                },
+                rooms: [],
+                picking_room_chat: null,
+                room_chat_details: [],
+
             },
 
             created: async function () {
@@ -356,6 +359,8 @@
                     }
                     this.wasConnected = false
                     this.rooms = []
+                    this.picking_room_chat = null
+                    this.room_chat_details = []
 
                     // Emit logout to other client in session
                     this.socket.emit('logout')
@@ -423,24 +428,30 @@
                 },
 
                 async chooseRoom(roomId) {
-                    console.log(roomId)
                     this.loadingMode = true
 
                     try {
+                        this.picking_room_chat = roomId
                         let getChatDetailsEndPoint = this.endpoints[this.routePrefix]['get_chat_detail_list']['url']
 
                         let response = await axiosService.get(
                             getChatDetailsEndPoint,
                             {
                                 params: {
-                                    room_id: roomId
+                                    room_chat_id: roomId
                                 }
                             }
                         )
 
-                        console.log(response.data)
+                        if (response.data.data) {
+                            this.room_chat_details = {...response.data.data}
+                        }else {
+                            this.room_chat_details = []
+                        }
 
                     } catch (e) {
+                        this.picking_room_chat = null
+                        this.room_chat_details = []
                         console.log(e)
                     }
 
@@ -469,8 +480,7 @@
 
                         // Reset auth variables if unauthenticated
                         if (code === 401) {
-                            this.wasConnected = false
-                            this.authUser = {}
+                            this.logout()
                         }
                     });
 
@@ -489,6 +499,8 @@
                         }
                         this.wasConnected = false
                         this.rooms = []
+                        this.picking_room_chat = null
+                        this.room_chat_details = []
                         this.socket.disconnect()
                     })
 
