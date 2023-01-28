@@ -108,9 +108,9 @@
 .main-container .room-chat-detail-column .room-chat-detail-column-top{
     flex: 1;
     margin: 10px 20px;
-    overflow-y: scroll;
     display: flex;
     flex-direction: column;
+    overflow:auto;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item {

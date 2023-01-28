@@ -411,6 +411,16 @@
                         (senderType === 'Expert' && this.routePrefix === 'supplier-api')
                 },
 
+                 scrollChatMessageBox() {
+                    setTimeout( async() => {
+                        let ref = await document.querySelector('.room-chat-detail-column-top')
+                        if (ref) {
+                            ref.scrollTop = ref.scrollHeight;
+                        }
+                    }, 200)
+
+                },
+
                 logout() {
                     localStorage.removeItem('ape-chat-token');
                     localStorage.removeItem('ape-chat-route-prefix');
@@ -528,6 +538,7 @@
 
                         if (response.data.data) {
                             this.roomChatDetails =  [...response.data.data]
+                            this.scrollChatMessageBox()
                         }else {
                             this.roomChatDetails = []
                         }
@@ -577,6 +588,7 @@
                         if (this.pickingRoomChat.id === response.data.room_chat_id) {
 
                             this.roomChatDetails.push(response.data)
+                            this.scrollChatMessageBox()
                         }
                     });
 
