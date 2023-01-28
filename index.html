@@ -4,7 +4,7 @@
     <title>Ape Chat Demo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
 
 
     <!--  Document: https://v2.vuejs.org/v2/guide/index.html  -->
@@ -134,9 +134,9 @@
             <div class="col-3 room-chat-column">
                 <template v-if=" routePrefix === 'supplier-api' ">
                     <template v-for="room in rooms">
-                        <div class="room-item" @click="chooseRoom(room.id)">
+                        <div class="room-item" @click="chooseRoom(room)">
                             <div class="room-item-image">
-                                <img v-bind:src="room.member.member_avatar" alt="Roommate avtar">
+                                <img v-bind:src="room.member.member_avatarimg || './assets/images/placeholder-user.png'" alt="Roommate avatar">
                             </div>
                             <div class="room-item-info">
                                 <p>
@@ -152,9 +152,9 @@
 
                 <template v-else>
                     <template v-for="room in rooms">
-                        <div class="room-item"   @click="chooseRoom(room.id)" >
+                        <div class="room-item"   @click="chooseRoom(room)" >
                             <div class="room-item-image">
-                                <img v-bind:src="room.expert.expert_avatar" alt="Roommate avtar">
+                                <img v-bind:src="room.expert.expert_avatar || './assets/images/placeholder-user.png'" alt="Roommate avatar">
                             </div>
                             <div class="room-item-info">
                                 <p>
@@ -169,33 +169,52 @@
                 </template>
             </div>
 
-
             <!--      THIRD COLUMN      -->
             <div class="col-6 room-chat-detail-column">
-                <template v-if="picking_room_chat">
+                <template v-if="pickingRoomChat">
                     <div class="room-chat-detail-column-top">
-                        <template v-for="room_chat_detail in room_chat_details">
-                            <div class="chat-item " :class="{ right: isSender(room_chat_detail.sender_type), left: !isSender(room_chat_detail.sender_type) }">
-                                <div class="chat-item-box" >
-                                    <div class="chat-avatar">
-                                        <img src="https://dummyimage.com/600x400/000/fff" alt="Roommate avtar">
-                                    </div>
-                                    <div class="chat-content">
-                                        Here is the message Here is the message Here is the message Here is the message Here is the message
-                                        <div class="chat-at">
-                                            01/01/2023 10:30
+                        <template v-for="roomChatDetail in roomChatDetails">
+                            <template v-if="isSender(roomChatDetail.sender_type)">
+                                <div class="chat-item right">
+                                    <div class="chat-item-box" >
+                                        <div class="chat-avatar">
+                                            <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' " alt="Roommate avatar">
+                                        </div>
+                                        <div class="chat-content">
+                                            {{roomChatDetail.content}}
+                                            <div class="chat-at">
+                                                {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
+
+                            <template v-else>
+                                <div class="chat-item left">
+                                    <div class="chat-item-box" >
+                                        <div class="chat-avatar">
+                                            <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' " alt="Roommate avatar">
+                                        </div>
+                                        <div class="chat-content">
+                                            {{roomChatDetail.content}}
+                                            <div class="chat-at">
+                                                {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
                         </template>
                     </div>
                     <div class="room-chat-detail-column-bottom">
                         <form id="create-message">
                             <div class="form-group">
-                                <textarea class="form-control" placeholder="Message" required></textarea>
+                                <textarea  v-model="chatMessage.content" class="form-control" placeholder="Message" required></textarea>
                             </div>
                             <button
+                                    @click="sendChatMessage"
                                     type="button"
                                     class="btn btn-primary w-100">
                                 Send
@@ -227,7 +246,7 @@
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 8000,
+        timer: 3000,
         timerProgressBar: true
     })
 
@@ -346,9 +365,11 @@
                     partner_id: null
                 },
                 rooms: [],
-                picking_room_chat: null,
-                room_chat_details: [],
-
+                pickingRoomChat: null,
+                roomChatDetails: [],
+                chatMessage: {
+                    content: ''
+                },
             },
 
 
@@ -401,8 +422,8 @@
                     }
                     this.wasConnected = false
                     this.rooms = []
-                    this.picking_room_chat = null
-                    this.room_chat_details = []
+                    this.pickingRoomChat = null
+                    this.roomChatDetails = []
 
                     // Emit logout to other client in session
                     this.socket.emit('logout')
@@ -469,7 +490,28 @@
                     this.loadingMode = false
                 },
 
-                async chooseRoom(roomId) {
+                sendChatMessage() {
+                    if (!this.chatMessage.content) {
+                        return showErrorAlert('Please Fill Message')
+                    }
+
+                    try {
+                        // Emit send chat message room
+                        this.socket.emit('send-chat-message', {
+                            room_chat_id: this.pickingRoomChat.id,
+                            expert_id: this.pickingRoomChat.expert_id,
+                            member_id: this.pickingRoomChat.member_id,
+                            content: this.chatMessage.content,
+                        })
+
+                        this.chatMessage.content = ''
+
+                    } catch (e) {
+                        showErrorAlert('Something went wrong')
+                    }
+                },
+
+                async chooseRoom(room) {
                     this.loadingMode = true
 
                     try {
@@ -479,22 +521,22 @@
                             getChatDetailsEndPoint,
                             {
                                 params: {
-                                    room_chat_id: roomId
+                                    room_chat_id: room.id
                                 }
                             }
                         )
 
                         if (response.data.data) {
-                            this.room_chat_details = {...response.data.data}
+                            this.roomChatDetails =  [...response.data.data]
                         }else {
-                            this.room_chat_details = []
+                            this.roomChatDetails = []
                         }
 
-                        this.picking_room_chat = roomId
+                        this.pickingRoomChat = room
 
                     } catch (e) {
-                        this.picking_room_chat = null
-                        this.room_chat_details = []
+                        this.pickingRoomChat = null
+                        this.roomChatDetails = []
                         console.log(e)
                     }
 
@@ -527,8 +569,15 @@
                         }
                     });
 
-                    this.socket.on("load-rooms", (rooms) => {
-                        this.rooms = rooms
+                    this.socket.on("load-rooms", (response) => {
+                        this.rooms = response.data
+                    });
+
+                    this.socket.on("new-chat-message", (response) => {
+                        if (this.pickingRoomChat.id === response.data.room_chat_id) {
+
+                            this.roomChatDetails.push(response.data)
+                        }
                     });
 
                     this.socket.on("logout", () => {
@@ -542,8 +591,8 @@
                         }
                         this.wasConnected = false
                         this.rooms = []
-                        this.picking_room_chat = null
-                        this.room_chat_details = []
+                        this.pickingRoomChat = null
+                        this.roomChatDetails = []
                         this.socket.disconnect()
                     })
 
