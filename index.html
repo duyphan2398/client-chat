@@ -34,7 +34,7 @@
         <div class="row">
 
             <!--      FIRST COLUMN      -->
-            <div class="col-2 first-column">
+            <div class="col-3 first-column">
                 <div class="auth-info">
                     <template v-if=" routePrefix === 'supplier-api' ">
                         <h3 class="text-center">Expert Info</h3>
@@ -131,7 +131,7 @@
 
 
             <!--      SECOND COLUMN      -->
-            <div class="col-4 room-chat-column">
+            <div class="col-3 room-chat-column">
                 <template v-if=" routePrefix === 'supplier-api' ">
                     <template v-for="room in rooms">
                         <div class="room-item" @click="chooseRoom(room.id)">
@@ -166,6 +166,42 @@
                             </div>
                         </div>
                     </template>
+                </template>
+            </div>
+
+
+            <!--      THIRD COLUMN      -->
+            <div class="col-6 room-chat-detail-column">
+                <template v-if="picking_room_chat">
+                    <div class="room-chat-detail-column-top">
+                        <template v-for="room_chat_detail in room_chat_details">
+                            <div class="chat-item " :class="{ right: isSender(room_chat_detail.sender_type), left: !isSender(room_chat_detail.sender_type) }">
+                                <div class="chat-item-box" >
+                                    <div class="chat-avatar">
+                                        <img src="https://dummyimage.com/600x400/000/fff" alt="Roommate avtar">
+                                    </div>
+                                    <div class="chat-content">
+                                        Here is the message Here is the message Here is the message Here is the message Here is the message
+                                        <div class="chat-at">
+                                            01/01/2023 10:30
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="room-chat-detail-column-bottom">
+                        <form id="create-message">
+                            <div class="form-group">
+                                <textarea class="form-control" placeholder="Message" required></textarea>
+                            </div>
+                            <button
+                                    type="button"
+                                    class="btn btn-primary w-100">
+                                Send
+                            </button>
+                        </form>
+                    </div>
                 </template>
             </div>
         </div>
@@ -315,6 +351,7 @@
 
             },
 
+
             created: async function () {
                 this.sessionId = localStorage.getItem('ape-chat-session-id')
                 this.token = localStorage.getItem('ape-chat-token')
@@ -348,6 +385,11 @@
 
 
             methods: {
+                isSender(senderType) {
+                    return (senderType === 'Member' && this.routePrefix === 'api') ||
+                        (senderType === 'Expert' && this.routePrefix === 'supplier-api')
+                },
+
                 logout() {
                     localStorage.removeItem('ape-chat-token');
                     localStorage.removeItem('ape-chat-route-prefix');
@@ -431,7 +473,6 @@
                     this.loadingMode = true
 
                     try {
-                        this.picking_room_chat = roomId
                         let getChatDetailsEndPoint = this.endpoints[this.routePrefix]['get_chat_detail_list']['url']
 
                         let response = await axiosService.get(
@@ -448,6 +489,8 @@
                         }else {
                             this.room_chat_details = []
                         }
+
+                        this.picking_room_chat = roomId
 
                     } catch (e) {
                         this.picking_room_chat = null

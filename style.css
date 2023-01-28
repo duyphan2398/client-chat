@@ -86,9 +86,8 @@
 .main-container .room-chat-column .room-item .room-item-image img {
     height: 60px;
     max-width: 60px;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 50%;
-    background-color: rgba(250, 206, 168, 0.6);
 }
 
 .main-container .room-chat-column .room-item .room-item-info {
@@ -96,3 +95,91 @@
     flex: 1;
     margin-left: 10px;
 }
+
+
+/*Chat Room Detail Column*/
+.main-container .room-chat-detail-column{
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    max-height: 100vh;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top{
+    flex: 1;
+    margin: 10px 20px;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item {
+    max-width: 70%;
+    padding: 8px 3px;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.left {
+    align-self: start;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.right {
+    align-self: end;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item .chat-item-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.right .chat-item-box {
+    justify-content: end;
+    flex-direction: row-reverse;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item .chat-item-box .chat-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item  .chat-item-box .chat-avatar img {
+    height: 50px;
+    width: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item .chat-item-box .chat-content {
+    font-size: 15px;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.right .chat-item-box .chat-content {
+    text-align: end;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item .chat-item-box .chat-content .chat-at {
+    font-size: 10px;
+    color: grey;
+    font-weight: 550;
+}
+
+
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom{
+    background: beige;
+    min-height: 25vh;
+    display: flex;
+    align-items: center;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom form{
+    margin: 10px 15px;
+    width: 100%;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom form textarea{
+    resize: none;
+}
+
