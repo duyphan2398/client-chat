@@ -211,7 +211,7 @@
                     <div class="room-chat-detail-column-bottom">
                         <form id="create-message">
                             <div class="form-group">
-                                <textarea  v-model="chatMessage.content" class="form-control" placeholder="Message" required></textarea>
+                                <input type="text"  v-model="chatMessage.content" class="form-control" placeholder="Message"  maxlength="200" required />
                             </div>
                             <button
                                     @click="sendChatMessage"
