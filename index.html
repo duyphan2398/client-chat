@@ -486,7 +486,9 @@
                     this.socket.emit('logout')
                 },
 
-                async submitConnectForm() {
+                async submitConnectForm(e) {
+                    e.preventDefault()
+
                     if (!this.token) {
                         return showErrorAlert('Please Fill Full Fields')
                     }
@@ -514,7 +516,8 @@
                     this.loadingMode = false
                 },
 
-                async submitCreateRoomForm() {
+                async submitCreateRoomForm(e) {
+                    e.preventDefault()
 
                     if (!this.createRoomForm.partner_id) {
                         return showErrorAlert('Please Fill Full Fields')
