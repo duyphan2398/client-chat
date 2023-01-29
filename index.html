@@ -453,16 +453,27 @@
                 logout() {
                     localStorage.removeItem('ape-chat-token');
                     localStorage.removeItem('ape-chat-route-prefix');
-                    this.token = '';
-                    this.routePrefix = 'api';
-                    this.authUser = {};
+                    // Auth variables
+                    this.token = ''
+                    this.routePrefix = 'api'
+                    this.wasConnected = false
+                    this.authUser = {}
+
+                    // Socket variables
+                    this.socket = {};
+
+                    // Chat variable
                     this.createRoomForm = {
                         partner_id: null
                     }
-                    this.wasConnected = false
                     this.rooms = []
                     this.pickingRoomChat = null
                     this.roomChatDetails = []
+                    this.chatMessage = {
+                        content: ''
+                    }
+                    this.isTyping = false
+                    this.typingTimeout = null
 
                     // Emit logout to other client in session
                     this.socket.emit('logout')
@@ -637,16 +648,29 @@
                     this.socket.on("logout", () => {
                         localStorage.removeItem('ape-chat-token');
                         localStorage.removeItem('ape-chat-route-prefix');
-                        this.token = '';
-                        this.routePrefix = 'api';
-                        this.authUser = {};
+                        // Auth variables
+                        this.token = ''
+                        this.routePrefix = 'api'
+                        this.wasConnected = false
+                        this.authUser = {}
+
+                        // Socket variables
+                        this.socket = {};
+
+                        // Chat variable
                         this.createRoomForm = {
                             partner_id: null
                         }
-                        this.wasConnected = false
                         this.rooms = []
                         this.pickingRoomChat = null
                         this.roomChatDetails = []
+                        this.chatMessage = {
+                            content: ''
+                        }
+                        this.isTyping = false
+                        this.typingTimeout = null
+
+
                         this.socket.disconnect()
                     })
 
