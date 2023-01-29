@@ -148,6 +148,7 @@
                                 </p>
                             </div>
                             <div class="room-item-seen-count" v-if="roomChat.not_seen_count">{{ roomChat.not_seen_count }}</div>
+                            <div class="room-item-state-icon" :class="{ online : roomChat.partner_state}"></div>
                         </div>
                     </template>
                 </template>
@@ -168,6 +169,7 @@
                                 </p>
                             </div>
                             <div class="room-item-seen-count" v-if="roomChat.not_seen_count">{{ roomChat.not_seen_count }}</div>
+                            <div class="room-item-state-icon" :class="{ online : roomChat.partner_state}"></div>
                         </div>
                     </template>
                 </template>
@@ -598,7 +600,7 @@
                             }
                         )
 
-                        if (response.data.data) {
+                        if (response.data.data?.length) {
                             this.roomChatDetails = [...response.data.data]
                             this.scrollChatMessageBox()
                             // Seen message event
@@ -675,10 +677,30 @@
                     });
 
                     this.socket.on("seen-room", (response) => {
-                        if (this.roomChats) {
+                        if (this.roomChats?.length) {
                             this.roomChats.forEach((roomChat) => {
                                 if (response.data.room_chat_id === roomChat.id) {
                                     roomChat.not_seen_count = 0
+                                }
+                            })
+                        }
+                    });
+
+                    this.socket.on("online", (response) => {
+                        if (this.roomChats?.length) {
+                            this.roomChats.forEach((roomChat) => {
+                                if (response.data.room_chat_id === roomChat.id) {
+                                    roomChat.partner_state = 1
+                                }
+                            })
+                        }
+                    });
+
+                    this.socket.on("offline", (response) => {
+                        if (this.roomChats?.length) {
+                            this.roomChats.forEach((roomChat) => {
+                                if (response.data.room_chat_id === roomChat.id) {
+                                    roomChat.partner_state = 0
                                 }
                             })
                         }

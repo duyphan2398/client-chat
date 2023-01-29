@@ -77,6 +77,7 @@
     padding: 10px;
     border-bottom: 3px solid rgba(135, 135, 135, 0.35);
     transition: 0.3s;
+    position: relative;
 }
 
 .main-container .room-chat-column .room-item:hover  {
@@ -107,6 +108,21 @@
     border-radius: 10px;
     background-color: red;
     color: white;
+}
+
+.main-container .room-chat-column .room-item .room-item-state-icon {
+    width: 15px;
+    height: 15px;
+
+    border-radius: 50%;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(7, 7, 7, 0.17);
+}
+
+.main-container .room-chat-column .room-item .room-item-state-icon.online {
+    background: green;
 }
 
 /*Chat Room Detail Column*/
