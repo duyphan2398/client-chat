@@ -20,6 +20,7 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
             integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI"
             crossorigin="anonymous"></script>
+
 </head>
 <body>
 
@@ -32,7 +33,6 @@
 
     <div class="container-fluid main-container">
         <div class="row">
-
             <!--      FIRST COLUMN      -->
             <div class="col-3 first-column">
                 <div class="auth-info">
@@ -205,11 +205,22 @@
                                     </div>
                                 </div>
                             </template>
-
                         </template>
+                        <div class="chat-item typing-box" :style="{ display: !isTyping ? 'none' :'flex' } ">
+                            <div class="chat-item-box" >
+                                <div class="chat-avatar">
+                                    <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' " alt="Roommate avatar">
+                                </div>
+                                <div class="chat-content">
+                                    <div class="typing-container">
+                                        <div class="typing"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="room-chat-detail-column-bottom">
-                        <form id="create-message">
+                        <form id="create-message" @submit="sendChatMessage">
                             <div class="form-group">
                                 <input type="text"  v-model="chatMessage.content" class="form-control" placeholder="Message"  maxlength="200" required />
                             </div>
@@ -247,7 +258,8 @@
         position: 'top-end',
         showConfirmButton: false,
         timer: 3000,
-        timerProgressBar: true
+        timerProgressBar: true,
+        showCloseButton: true,
     })
 
     const showSuccessAlert = (message) => {
@@ -370,8 +382,25 @@
                 chatMessage: {
                     content: ''
                 },
+                isTyping: false,
+                typingTimeout: null
             },
 
+            watch: {
+                // whenever question changes, this function will run
+                chatMessage: {
+                    handler(newChatMessage, oldChatMessage) {
+                        if (newChatMessage.content) {
+                            this.socket.emit('typing-chat-message', {
+                                room_chat_id: this.pickingRoomChat.id,
+                                expert_id: this.pickingRoomChat.expert_id,
+                                member_id: this.pickingRoomChat.member_id,
+                            });
+                        }
+                    },
+                    deep: true
+                }
+            },
 
             created: async function () {
                 this.sessionId = localStorage.getItem('ape-chat-session-id')
@@ -500,7 +529,9 @@
                     this.loadingMode = false
                 },
 
-                sendChatMessage() {
+                sendChatMessage(e) {
+                    e.preventDefault();
+
                     if (!this.chatMessage.content) {
                         return showErrorAlert('Please Fill Message')
                     }
@@ -556,13 +587,13 @@
 
                 initSocket() {
                     this.socket = io(server_url + '/chat', {
-                        auth: {...this.authUser},
                         extraHeaders: {
                             Authorization: this.token
                         },
                         query: {
                             'route_prefix': this.routePrefix,
-                            'session_id': this.sessionId
+                            'session_id': this.sessionId,
+                            'auth_id': this.authUser.id
                         }
                     });
 
@@ -589,6 +620,17 @@
 
                             this.roomChatDetails.push(response.data)
                             this.scrollChatMessageBox()
+                        }
+                    });
+
+                    this.socket.on("typing-chat-message", (response) => {
+                        if (this.pickingRoomChat.id === response.data.room_chat_id) {
+                            this.scrollChatMessageBox()
+                            this.isTyping = true
+                            if (this.typingTimeout) {
+                                clearTimeout(this.typingTimeout)
+                            }
+                            this.typingTimeout = setTimeout(() => this.isTyping = false, 1000)
                         }
                     });
 

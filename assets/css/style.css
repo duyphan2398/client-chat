@@ -111,6 +111,7 @@
     display: flex;
     flex-direction: column;
     overflow-y:scroll;
+    gap: 15px;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item {
@@ -132,7 +133,8 @@
     overflow: hidden;
     flex-direction: row;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
+    flex: 1;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.right .chat-item-box {
@@ -146,29 +148,34 @@
     align-items: center;
 }
 
-
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item  .chat-item-box .chat-avatar img {
-    height: 50px;
-    width: 50px;
+    height: 40px;
+    width: 40px;
     object-fit: cover;
     border-radius: 50%;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item .chat-item-box .chat-content {
-    font-size: 15px;
+    font-size: 13px;
     background: rgba(112, 128, 144, 0.24);
-    padding: 4px 5px;
+    padding: 8px 6px;
     overflow: hidden;
     overflow-wrap: break-word;
 }
 
+.main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.typing-box .chat-item-box .chat-content {
+    width: 100%;
+    text-align: center;
+    border-bottom-right-radius: 10px;
+}
+
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.left .chat-item-box .chat-content {
-    border-bottom-right-radius: 25px;
+    border-bottom-right-radius: 10px;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item.right .chat-item-box .chat-content {
     text-align: end;
-    border-bottom-left-radius: 25px;
+    border-bottom-left-radius: 10px;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-top .chat-item .chat-item-box .chat-content .chat-at {
@@ -193,4 +200,39 @@
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form input{
     height: 60px;
 }
+
+
+
+/*TYPING*/
+.typing-box {
+    display: none;
+}
+.typing-box .typing-container {
+    display: inline-block;
+}
+.typing,
+.typing:before,
+.typing:after {
+    width: 14px;
+    aspect-ratio: .5;
+    display: grid;
+    background: radial-gradient(rgba(0, 0, 0, 0.37) 68%,#0000 72%) center/100% 50% no-repeat;
+    animation: typing 1.2s infinite linear calc(var(--_s,0)*.4s);
+    transform: translate(calc(var(--_s,0)*150%));
+}
+.typing:before,
+.typing:after {
+    content: "";
+    grid-area: 1/1;
+}
+.typing:before {--_s: -1}
+.typing:after  {--_s:  1}
+
+@keyframes typing {
+    20% {background-position: top   }
+    40% {background-position: bottom}
+    60% {background-position: center}
+}
+
+
 
