@@ -573,6 +573,16 @@
                 async chooseRoomChat(roomChat) {
                     this.loadingMode = true
 
+                    // Clear old data
+                    this.pickingRoomChat = null
+                    this.roomChatDetails = []
+                    this.chatMessage = {
+                        content: ''
+                    }
+                    this.isTyping = false
+                    this.typingTimeout = null
+
+
                     try {
                         let getChatDetailsEndPoint = this.endpoints[this.routePrefix]['get_chat_detail_list']['url']
 
@@ -597,8 +607,6 @@
 
                         this.pickingRoomChat = roomChat
                     } catch (e) {
-                        this.pickingRoomChat = null
-                        this.roomChatDetails = []
                         console.log(e)
                     }
 
