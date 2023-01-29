@@ -460,6 +460,9 @@
                 },
 
                 logout() {
+                    // Emit logout to other client in session
+                    this.socket.emit('logout')
+
                     localStorage.removeItem('ape-chat-token');
                     localStorage.removeItem('ape-chat-route-prefix');
                     // Auth variables
@@ -483,9 +486,6 @@
                     }
                     this.isTyping = false
                     this.typingTimeout = null
-
-                    // Emit logout to other client in session
-                    this.socket.emit('logout')
                 },
 
                 async submitConnectForm(e) {
@@ -707,6 +707,8 @@
                     });
 
                     this.socket.on("logout", () => {
+                        this.socket.disconnect();
+
                         localStorage.removeItem('ape-chat-token');
                         localStorage.removeItem('ape-chat-route-prefix');
                         // Auth variables
@@ -730,9 +732,6 @@
                         }
                         this.isTyping = false
                         this.typingTimeout = null
-
-
-                        this.socket.disconnect()
                     })
 
                 }
