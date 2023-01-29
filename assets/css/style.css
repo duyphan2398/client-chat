@@ -96,6 +96,18 @@
     margin-left: 10px;
 }
 
+.main-container .room-chat-column .room-item .room-item-seen-count {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 550;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 1px 3px;
+    border-radius: 10px;
+    background-color: red;
+    color: white;
+}
 
 /*Chat Room Detail Column*/
 .main-container .room-chat-detail-column{
