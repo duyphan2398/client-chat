@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: 'client-chat',
-            
+
         },
     ],
     deploy: {
@@ -13,6 +13,7 @@ module.exports = {
             repo: 'git@github.com:duyphan2398/client-chat.git',
             ssh_options: ['ForwardAgent=yes'],
             path: '/var/www/CHAT/client-chat/',
+            'post-deploy': '',
         },
     }
 }
