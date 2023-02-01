@@ -230,10 +230,16 @@
                     </div>
                     <div class="room-chat-detail-column-bottom">
                         <form id="create-message" @submit="sendChatMessage">
-                            <div class="form-group">
-                                <input type="text" v-model="chatMessage.content" class="form-control"
-                                       placeholder="Message" maxlength="200" required/>
+                            <div class="form-input">
+                                <div class="form-group">
+                                    <input type="text" v-model="chatMessage.content" class="form-control"
+                                           placeholder="Message" maxlength="200" required/>
+                                </div>
+                                <div class="form-group">
+                                    <input type="file" onchange="upload(this.files)"  class="form-control-file border">
+                                </div>
                             </div>
+
                             <button
                                     @click="sendChatMessage"
                                     type="button"
@@ -448,6 +454,13 @@
                 isSender(senderType) {
                     return (senderType === 'Member' && this.routePrefix === 'api') ||
                         (senderType === 'Expert' && this.routePrefix === 'supplier-api')
+                },
+
+                upload(files) {
+                    console.log(files)
+                    socket.emit("upload", files[0], (status) => {
+                        console.log(status);
+                    });
                 },
 
                 scrollChatMessageBox() {

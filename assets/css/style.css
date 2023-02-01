@@ -225,8 +225,24 @@
     width: 100%;
 }
 
-.main-container .room-chat-detail-column .room-chat-detail-column-bottom form input{
-    height: 60px;
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input .form-group:first-child{
+    width: 50%;
+
+}
+
+
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input .form-group input{
+    height: 90px;
+
 }
 
 
