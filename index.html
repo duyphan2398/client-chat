@@ -253,7 +253,7 @@
     import {v4 as uuidv4} from 'https://jspm.dev/uuid';
 
     // [--------------------------  ENV VARIABLES --------------------------------
-    const server_url = 'http://localhost:3000';
+    const server_url = window.location.origin.includes('backend-dev.one') ? 'https://nest-chat.backend-dev.one' : 'http://localhost:3000';
     const locale = 'zho';
     // --------------------------  ENV VARIABLES --------------------------------]
 
