@@ -36,30 +36,15 @@
             <!--      FIRST COLUMN      -->
             <div class="col-3 first-column">
                 <div class="auth-info">
-                    <template v-if=" routePrefix === 'supplier-api' ">
-                        <h3 class="text-center">Expert Info</h3>
-                        <p>
-                            <b>Expert ID:</b> {{ authUser.id}}
-                        </p>
-                        <p>
-                            <b>Expert Name:</b> {{ authUser.name}}
-                        </p>
-                    </template>
-
-                    <template v-else>
-                        <h3 class="text-center">Member Info</h3>
-                        <p>
-                            <b>Member ID:</b> {{ authUser.id}}
-                        </p>
-                        <p>
-                            <b>Member Email:</b> {{ authUser.email}}
-                        </p>
-                        <p>
-                            <b>Member Phone:</b> {{ authUser.phone_number}}
-                        </p>
-                    </template>
+                    <h3 class="text-center">Member Info</h3>
                     <p>
-                        <b>Page:</b> {{ routePrefix === 'api' ? 'Member Page' : 'Supplier Dashboard'}}
+                        <b>Member ID:</b> {{ authUser.id }}
+                    </p>
+                    <p>
+                        <b>Member Email:</b> {{ authUser.email }}
+                    </p>
+                    <p>
+                        <b>Member Phone:</b> {{ authUser.phone_number }}
                     </p>
                 </div>
                 <div class="connect-form">
@@ -75,17 +60,6 @@
                                    :disabled="this.wasConnected"
                                    required>
                         </div>
-                        <div class="form-group">
-                            <label>Connect Page:</label>
-                            <select class="form-control"
-                                    v-model="routePrefix"
-                                    :disabled="this.wasConnected"
-                                    required>
-                                <option value="api">Member Pages</option>
-                                <option value="supplier-api">Supplier Dashboard</option>
-                            </select>
-                        </div>
-
                         <button
                                 @click="submitConnectForm"
                                 type="button"
@@ -131,125 +105,103 @@
 
 
             <!--      SECOND COLUMN      -->
-            <div class="col-3 room-chat-column">
-                <template v-if=" routePrefix === 'supplier-api' ">
-                    <template v-for="roomChat in roomChats">
-                        <div class="room-item" @click="chooseRoomChat(roomChat)">
-                            <div class="room-item-image">
-                                <img v-bind:src="roomChat.member.avatar || './assets/images/placeholder-user.png'"
-                                     alt="Roommate avatar">
-                            </div>
-                            <div class="room-item-info">
-                                <p>
-                                    <b>Member Phone: {{ roomChat.member.phone_number }}</b>
-                                </p>
-                                <p>
-                                    Member ID: {{ roomChat.member.id }}
-                                </p>
-                            </div>
-                            <div class="room-item-seen-count" v-if="roomChat.not_seen_count">{{ roomChat.not_seen_count }}</div>
-                            <div class="room-item-state-icon" :class="{ online : roomChat.partner_state}"></div>
-                        </div>
-                    </template>
-                </template>
-
-                <template v-else>
-                    <template v-for="roomChat in roomChats">
-                        <div class="room-item" @click="chooseRoomChat(roomChat)">
-                            <div class="room-item-image">
-                                <img v-bind:src="roomChat.expert.expert_avatar || './assets/images/placeholder-user.png'"
-                                     alt="Roommate avatar">
-                            </div>
-                            <div class="room-item-info">
-                                <p>
-                                    <b>Expert Name: {{ roomChat.expert.name }}</b>
-                                </p>
-                                <p>
-                                    Expert ID: {{ roomChat.expert.id }}
-                                </p>
-                            </div>
-                            <div class="room-item-seen-count" v-if="roomChat.not_seen_count">{{ roomChat.not_seen_count }}</div>
-                            <div class="room-item-state-icon" :class="{ online : roomChat.partner_state}"></div>
-                        </div>
-                    </template>
-                </template>
-            </div>
+<!--            <div class="col-3 room-chat-column">-->
+<!--                <template v-for="roomChat in roomChats">-->
+<!--                    <div class="room-item" @click="chooseRoomChat(roomChat)">-->
+<!--                        <div class="room-item-image">-->
+<!--                            <img v-bind:src="roomChat.member.avatar || './assets/images/placeholder-user.png'"-->
+<!--                                 alt="Roommate avatar">-->
+<!--                        </div>-->
+<!--                        <div class="room-item-info">-->
+<!--                            <p>-->
+<!--                                <b>Member Phone: {{ roomChat.member.phone_number }}</b>-->
+<!--                            </p>-->
+<!--                            <p>-->
+<!--                                Member ID: {{ roomChat.member.id }}-->
+<!--                            </p>-->
+<!--                        </div>-->
+<!--                        <div class="room-item-seen-count" v-if="roomChat.not_seen_count">{{ roomChat.not_seen_count }}-->
+<!--                        </div>-->
+<!--                        <div class="room-item-state-icon" :class="{ online : roomChat.partner_state}"></div>-->
+<!--                    </div>-->
+<!--                </template>-->
+<!--            </div>-->
 
             <!--      THIRD COLUMN      -->
-            <div class="col-6 room-chat-detail-column">
-                <template v-if="pickingRoomChat">
-                    <div class="room-chat-detail-column-top">
-                        <template v-for="roomChatDetail in roomChatDetails">
-                            <template v-if="isSender(roomChatDetail.sender_type)">
-                                <div class="chat-item right">
-                                    <div class="chat-item-box">
-                                        <div class="chat-avatar">
-                                            <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' "
-                                                 alt="Roommate avatar">
-                                        </div>
-                                        <div class="chat-content">
-                                            {{roomChatDetail.content}}
-                                            <div class="chat-at">
-                                                {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
+<!--            <div class="col-6 room-chat-detail-column">-->
+<!--                <template v-if="pickingRoomChat">-->
+<!--                    <div class="room-chat-detail-column-top">-->
+<!--                        <template v-for="roomChatDetail in roomChatDetails">-->
+<!--                            <template v-if="isSender(roomChatDetail.sender_type)">-->
+<!--                                <div class="chat-item right">-->
+<!--                                    <div class="chat-item-box">-->
+<!--                                        <div class="chat-avatar">-->
+<!--                                            <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' "-->
+<!--                                                 alt="Roommate avatar">-->
+<!--                                        </div>-->
+<!--                                        <div class="chat-content">-->
+<!--                                            {{roomChatDetail.content}}-->
+<!--                                            <div class="chat-at">-->
+<!--                                                {{ new Date(roomChatDetail.chat_time).toLocaleString()}}-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </template>-->
 
-                            <template v-else>
-                                <div class="chat-item left">
-                                    <div class="chat-item-box">
-                                        <div class="chat-avatar">
-                                            <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' "
-                                                 alt="Roommate avatar">
-                                        </div>
-                                        <div class="chat-content">
-                                            {{roomChatDetail.content}}
-                                            <div class="chat-at">
-                                                {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </template>
-                        <div class="chat-item typing-box" :style="{ display: !isTyping ? 'none' :'flex' } ">
-                            <div class="chat-item-box">
-                                <div class="chat-avatar">
-                                    <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' "
-                                         alt="Roommate avatar">
-                                </div>
-                                <div class="chat-content">
-                                    <div class="typing-container">
-                                        <div class="typing"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="room-chat-detail-column-bottom">
-                        <form id="create-message" @submit="sendChatMessage">
-                            <div class="form-input">
-                                <div class="form-group">
-                                    <input type="text" v-model="chatMessage.content" class="form-control"
-                                           placeholder="Message" maxlength="200" required/>
-                                </div>
-                                <div class="form-group">
-                                    <input type="file" onchange="upload(this.files)"  class="form-control-file border">
-                                </div>
-                            </div>
+<!--                            <template v-else>-->
+<!--                                <div class="chat-item left">-->
+<!--                                    <div class="chat-item-box">-->
+<!--                                        <div class="chat-avatar">-->
+<!--                                            <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' "-->
+<!--                                                 alt="Roommate avatar">-->
+<!--                                        </div>-->
+<!--                                        <div class="chat-content">-->
+<!--                                            {{roomChatDetail.content}}-->
+<!--                                            <div class="chat-at">-->
+<!--                                                {{ new Date(roomChatDetail.chat_time).toLocaleString()}}-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </template>-->
+<!--                        </template>-->
+<!--                        <div class="chat-item typing-box" :style="{ display: !isTyping ? 'none' :'flex' } ">-->
+<!--                            <div class="chat-item-box">-->
+<!--                                <div class="chat-avatar">-->
+<!--                                    <img v-bind:src="(routePrefix === 'api' ? pickingRoomChat.member?.avatar : pickingRoomChat.expert?.expert_avatar) || './assets/images/placeholder-user.png' "-->
+<!--                                         alt="Roommate avatar">-->
+<!--                                </div>-->
+<!--                                <div class="chat-content">-->
+<!--                                    <div class="typing-container">-->
+<!--                                        <div class="typing"></div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="room-chat-detail-column-bottom">-->
+<!--                        <form id="create-message" @submit="sendChatMessage">-->
+<!--                            <div class="form-input">-->
+<!--                                <div class="form-group">-->
+<!--                                    <input type="text" v-model="chatMessage.content" class="form-control"-->
+<!--                                           placeholder="Message" maxlength="200" required/>-->
+<!--                                </div>-->
+<!--                                <div class="form-group">-->
+<!--                                    <input type="file" onchange="upload(this.files)"  class="form-control-file border">-->
+<!--                                </div>-->
+<!--                            </div>-->
 
-                            <button
-                                    @click="sendChatMessage"
-                                    type="button"
-                                    class="btn btn-primary w-100">
-                                Send
-                            </button>
-                        </form>
-                    </div>
-                </template>
-            </div>
+<!--                            <button-->
+<!--                                    @click="sendChatMessage"-->
+<!--                                    type="button"-->
+<!--                                    class="btn btn-primary w-100">-->
+<!--                                Send-->
+<!--                            </button>-->
+<!--                        </form>-->
+<!--                    </div>-->
+<!--                </template>-->
+<!--            </div>-->
         </div>
     </div>
     <div>
@@ -364,23 +316,14 @@
 
                 // APIS
                 endpoints: {
-                    'api': {
-                        profile: {url: '/api/members/profile', method: 'get'},
-                        create_room_chat: {url: '/api/room-chats', method: 'post'},
-                        get_chat_detail_list: {url: '/api/room-chat-details', method: 'get'}
-                    },
-
-                    'supplier-api': {
-                        profile: {url: '/supplier-api/suppliers/profile', method: 'get'},
-                        create_room_chat: {url: '/supplier-api/room-chats', method: 'post'},
-                        get_chat_detail_list: {url: '/supplier-api/room-chat-details', method: 'get'}
-                    }
+                    profile: {url: '/api/members/profile', method: 'get'},
+                    create_room_chat: {url: '/api/room-chats', method: 'post'},
+                    get_chat_detail_list: {url: '/api/room-chat-details', method: 'get'}
                 },
 
                 // Auth variables
                 sessionId: '',
                 token: '',
-                routePrefix: 'api',
 
                 wasConnected: false,
                 authUser: {},
@@ -421,7 +364,6 @@
             created: async function () {
                 this.sessionId = localStorage.getItem('ape-chat-session-id')
                 this.token = localStorage.getItem('ape-chat-token')
-                this.routePrefix = localStorage.getItem('ape-chat-route-prefix')
 
                 if (this.token &&
                     this.routePrefix &&
@@ -429,7 +371,7 @@
                 ) {
                     this.loadingMode = true
                     try {
-                        let connectEndPoint = this.endpoints[this.routePrefix]['profile']['url']
+                        let connectEndPoint = this.endpoints['profile']['url']
 
                         let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
                         this.authUser = response.data.data
@@ -510,7 +452,7 @@
 
                     this.loadingMode = true
                     try {
-                        let connectEndPoint = this.endpoints[this.routePrefix]['profile']['url']
+                        let connectEndPoint = this.endpoints['profile']['url']
 
                         let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
                         this.authUser = response.data.data
@@ -521,7 +463,6 @@
 
                         // Set local storage
                         localStorage.setItem('ape-chat-token', this.token)
-                        localStorage.setItem('ape-chat-route-prefix', this.routePrefix)
 
                         this.wasConnected = true;
                     } catch (e) {
