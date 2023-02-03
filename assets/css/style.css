@@ -223,6 +223,11 @@
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form{
     margin: 10px 15px;
     width: 100%;
+    text-align: center;
+}
+
+.main-container .room-chat-detail-column .room-chat-detail-column-bottom form button{
+    width: 40%;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input{
@@ -235,14 +240,12 @@
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input .form-group:first-child{
-    width: 50%;
-
+    width: 80%;
 }
 
 
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input .form-group input{
     height: 90px;
-
 }
 
 
