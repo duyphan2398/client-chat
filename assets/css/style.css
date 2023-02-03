@@ -233,14 +233,14 @@
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input{
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 4px;
     align-items: center;
     justify-content: center;
     width: 100%;
 }
 
 .main-container .room-chat-detail-column .room-chat-detail-column-bottom form .form-input .form-group:first-child{
-    width: 80%;
+    width: 90%;
 }
 
 
