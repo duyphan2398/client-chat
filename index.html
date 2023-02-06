@@ -210,7 +210,9 @@
                                            placeholder="Message" maxlength="200" required/>
                                 </div>
                                 <div class="form-group">
-                                    <input type="file" onchange="upload(this.files)"  class="form-control-file border">
+                                    <input type="file"
+                                    @change="onUpload"
+                                    class="form-control-file border">
                                 </div>
                             </div>
 
@@ -340,7 +342,8 @@
                 endpoints: {
                     profile: {url: '/api/members/profile', method: 'get'},
                     create_room_chat: {url: '/api/room-chats', method: 'post'},
-                    get_chat_detail_list: {url: '/api/room-chat-details', method: 'get'}
+                    get_chat_detail_list: {url: '/api/room-chat-details', method: 'get'},
+                    upload_image: {url: '/api/room-chat-detail-images/upload', method: 'post'}
                 },
 
                 // Auth variables
@@ -364,7 +367,8 @@
                     content: ''
                 },
                 isTyping: false,
-                typingTimeout: null
+                typingTimeout: null,
+                uploadFile: null
             },
 
             watch: {
@@ -390,9 +394,9 @@
                 ) {
                     this.loadingMode = true
                     try {
-                        let connectEndPoint = this.endpoints['profile']['url']
+                        let connectEndPoint = this.endpoints['upload_image']['url']
 
-                        let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
+                        let response = await axiosService.post(connectEndPoint, {headers: {'Authorization': this.token}})
                         this.authUser = response.data.data
                         showSuccessAlert('Connect successfully')
 
@@ -414,12 +418,18 @@
 
 
             methods: {
-                // upload(files) {
-                //     console.log(files)
-                //     socket.emit("upload", files[0], (status) => {
-                //         console.log(status);
-                //     });
-                // },
+                async onUpload(e) {
+                    var file = e.target.files;
+                    if (!file.length) return;
+                    this.uploadFile = file[0];
+                    
+                    let uploadEndPoint = this.endpoints['profile']['url']
+
+                    let response = await axiosService.post(uploadEndPoint, {
+                        file:  this.uploadFile 
+                    })
+                    console.log(response)
+                },
 
                 scrollChatMessageBox() {
                     setTimeout(async () => {
