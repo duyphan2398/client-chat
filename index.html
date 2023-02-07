@@ -165,7 +165,7 @@
                                                 {{roomChatDetail.content}}
                                             </template>
                                             <template v-if="roomChatDetail.type === messageType.image">
-                                                <img v-bind:src="roomChatDetail.room_chat_detail_image.path" alt="Image Message" style="width: 100px; height: 100px;">
+                                                <img v-bind:src="roomChatDetail.room_chat_detail_image?.path" alt="Image Message" style="width: 100px; height: 100px;">
                                             </template>
                                             <div class="chat-at">
                                                 {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
@@ -187,7 +187,7 @@
                                                 {{roomChatDetail.content}}
                                             </template>
                                             <template v-if="roomChatDetail.type === messageType.image">
-                                                <img v-bind:src="roomChatDetail.room_chat_detail_image.path" alt="Image Message" style="width: 100px; height: 100px;">
+                                                <img v-bind:src="roomChatDetail.room_chat_detail_image?.path" alt="Image Message" style="width: 100px; height: 100px;">
                                             </template>
                                             <div class="chat-at">
                                                 {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
@@ -408,9 +408,9 @@
                 ) {
                     this.loadingMode = true
                     try {
-                        let connectEndPoint = this.endpoints['upload_image']['url']
+                        let connectEndPoint = this.endpoints['profile']['url']
 
-                        let response = await axiosService.post(connectEndPoint, {headers: {'Authorization': this.token}})
+                        let response = await axiosService.get(connectEndPoint, {headers: {'Authorization': this.token}})
                         this.authUser = response.data.data
                         showSuccessAlert('Connect successfully')
 
