@@ -161,7 +161,12 @@
                                                  alt="Owner avatar">
                                         </div>
                                         <div class="chat-content">
-                                            {{roomChatDetail.content}}
+                                            <template v-if="roomChatDetail.type === messageType.text">
+                                                {{roomChatDetail.content}}
+                                            </template>
+                                            <template v-if="roomChatDetail.type === messageType.image">
+                                                <img v-bind:src="roomChatDetail.room_chat_detail_image.path" alt="Image Message" style="width: 100px; height: 100px;">
+                                            </template>
                                             <div class="chat-at">
                                                 {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
                                             </div>
@@ -178,7 +183,12 @@
                                                  alt="Partner avatar">
                                         </div>
                                         <div class="chat-content">
-                                            {{roomChatDetail.content}}
+                                            <template v-if="roomChatDetail.type === messageType.text">
+                                                {{roomChatDetail.content}}
+                                            </template>
+                                            <template v-if="roomChatDetail.type === messageType.image">
+                                                <img v-bind:src="roomChatDetail.room_chat_detail_image.path" alt="Image Message" style="width: 100px; height: 100px;">
+                                            </template>
                                             <div class="chat-at">
                                                 {{ new Date(roomChatDetail.chat_time).toLocaleString()}}
                                             </div>
@@ -368,7 +378,11 @@
                 },
                 isTyping: false,
                 typingTimeout: null,
-                uploadFile: null
+                uploadFile: null,
+                messageType: {
+                    text: 0,
+                    image: 1
+                }
             },
 
             watch: {
@@ -420,15 +434,26 @@
             methods: {
                 async onUpload(e) {
                     var file = e.target.files;
-                    if (!file.length) return;
-                    this.uploadFile = file[0];
+                    if (!file.length) return;    
                     
-                    let uploadEndPoint = this.endpoints['profile']['url']
+                    let uploadEndPoint = this.endpoints['upload_image']['url']
+                    var formData = new FormData();
+                    formData.append('file', file[0])
+                    
+                    try {
+                        let response = await axiosService.post(uploadEndPoint, formData)
+                        let imageId = response.data?.data?.id
 
-                    let response = await axiosService.post(uploadEndPoint, {
-                        file:  this.uploadFile 
-                    })
-                    console.log(response)
+                        // Emit send chat message room
+                        this.socket.emit('send-chat-message-image', {
+                            room_chat_id: this.pickingRoomChat.id,
+                            image_id: imageId,
+                        })                
+                    } catch(e) {
+                        console.log(e)
+                    }
+                    
+                    e.target.value = null
                 },
 
                 scrollChatMessageBox() {
@@ -636,6 +661,24 @@
                             })
                         }
                     });
+
+                    this.socket.on("new-chat-message-image", (response) => {
+                        if (this.pickingRoomChat && this.pickingRoomChat.id === response.data.room_chat_id) {
+                            this.roomChatDetails.push(response.data)
+                            this.scrollChatMessageBox()
+
+                            // Seen message event
+                            this.socket.emit('seen-room', { room_chat_id: response.data.room_chat_id })
+
+                        } else {
+                            this.roomChats.forEach((roomChat) => {
+                                if (roomChat.id === response.data.room_chat_id) {
+                                    roomChat.not_seen_count+=1
+                                }
+                            })
+                        }
+                    });
+
 
                     this.socket.on("typing-chat-message", (response) => {
                         if (this.pickingRoomChat && this.pickingRoomChat.id === response.data.room_chat_id) {
